@@ -64,6 +64,16 @@ export async function parseV3ApiError(response: Response): Promise<V3ApiError> {
     problemBody = undefined;
   }
 
+  if (problemBody?.serverError) {
+    return new V3ApiError({
+      status: 500,
+      detail: problemBody.serverError,
+      code: problemBody?.code,
+      requestId: problemBody?.requestId ?? response.headers.get("X-Request-Id") ?? undefined,
+      invalid_params: problemBody?.invalid_params,
+    });
+  }
+
   return new V3ApiError({
     status: problemBody?.status ?? response.status,
     detail: problemBody?.detail ?? response.statusText ?? "An unexpected error occurred.",
